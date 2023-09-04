@@ -50,44 +50,44 @@ def main():
 
 
     # Connect to the camera
-    media_service_c1, media_profile_c1, ptz = connect_to_camera(ip_1, port, user, password)
+    # media_service_c1, media_profile_c1, ptz = connect_to_camera(ip_1, port, user, password)
     media_service_c2, media_profile_c2, ptz = connect_to_camera(ip_2, port, user, password)
 
 
     
 # Get Stream URI
-    stream_uri_c1 = get_stream_uri(media_service_c1, media_profile_c1)
+    # stream_uri_c1 = get_stream_uri(media_service_c1, media_profile_c1)
     stream_uri_c2 = get_stream_uri(media_service_c2, media_profile_c2)
     
     # Display video stream
-    cap_1 = cv2.VideoCapture(stream_uri_c1)
+    # cap_1 = cv2.VideoCapture(stream_uri_c1)
     cap_2 = cv2.VideoCapture(stream_uri_c2)
 
-    frame_1 = [None]
+    # frame_1 = [None]
     frame_2 = [None]
 
     # Start threads to capture frames
-    thread_1 = threading.Thread(target=capture_frame, args=(cap_1, frame_1))
+    # thread_1 = threading.Thread(target=capture_frame, args=(cap_1, frame_1))
     thread_2 = threading.Thread(target=capture_frame, args=(cap_2, frame_2))
-    thread_1.start()
+    # thread_1.start()
     thread_2.start()
 
     screen_width = 1920
     screen_height = 1080
 
     while True:
-        if frame_1[0] is not None and frame_2[0] is not None:
+        if frame_2[0] is not None: # and frame_2[0] is not None:
             # Process and display frames
                     # Resize frames to fit the window size
-            frame_1_resized = cv2.resize(frame_1[0], (screen_width, screen_height))
+            # frame_1_resized = cv2.resize(frame_1[0], (screen_width, screen_height))
             frame_2_resized = cv2.resize(frame_2[0], (screen_width, screen_height))
-            cv2.imshow('Camera 1', frame_1_resized)
+            # cv2.imshow('Camera 1', frame_1_resized)
             cv2.imshow('Camera 2', frame_2_resized)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    cap_1.release()
+    # cap_1.release()
     cap_2.release()
     cv2.destroyAllWindows()
 

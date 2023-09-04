@@ -1,16 +1,21 @@
 from onvif import ONVIFCamera
 import cv2
-import threading    
+import threading
+import os
+from datetime import datetime
 
 def zeep_pythonvalue(self, xmlvalue):
     return xmlvalue
 
-def capture_frame(cap, frame_container):
-    while True:
+def capture_frame(cap, frame_container, camera_folder, run_flag):
+    while run_flag[0]:
         ret, frame = cap.read()
         if ret:
             frame_container[0] = frame
-
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")  # YMD_HMS_microseconds
+            frame_path = os.path.join(camera_folder, f"frame_{timestamp}.jpg")
+            cv2.imwrite(frame_path, frame)
+            
 def connect_to_camera(ip, port, user, password):
     mycam = ONVIFCamera(ip, port, user, password)
     media_service = mycam.create_media_service()
@@ -18,7 +23,6 @@ def connect_to_camera(ip, port, user, password):
 
     # Create PTZ service object
     ptz = mycam.create_ptz_service()
-
     
     return media_service, media_profile, ptz
 
@@ -33,7 +37,13 @@ def get_stream_uri(media_service, media_profile):
     resp = media_service.GetStreamUri(request)
     return resp.Uri
 
+def create_folder_if_not_exists(folder_name):
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+
 def main():
+    create_folder_if_not_exists("camera_1_frames")
+    create_folder_if_not_exists("camera_2_frames")
 
     # Data Camera 1 -> K1
     ip_1 = '192.168.1.135'  
@@ -55,7 +65,7 @@ def main():
 
 
     
-# Get Stream URI
+    # Get Stream URI
     stream_uri_c1 = get_stream_uri(media_service_c1, media_profile_c1)
     stream_uri_c2 = get_stream_uri(media_service_c2, media_profile_c2)
     
@@ -66,9 +76,11 @@ def main():
     frame_1 = [None]
     frame_2 = [None]
 
+    run_flag = [True]  # Shared flag to control the threads
+
     # Start threads to capture frames
-    thread_1 = threading.Thread(target=capture_frame, args=(cap_1, frame_1))
-    thread_2 = threading.Thread(target=capture_frame, args=(cap_2, frame_2))
+    thread_1 = threading.Thread(target=capture_frame, args=(cap_1, frame_1, "camera_1_frames", run_flag))
+    thread_2 = threading.Thread(target=capture_frame, args=(cap_2, frame_2, "camera_2_frames", run_flag))
     thread_1.start()
     thread_2.start()
 
@@ -78,13 +90,14 @@ def main():
     while True:
         if frame_1[0] is not None and frame_2[0] is not None:
             # Process and display frames
-                    # Resize frames to fit the window size
+            # Resize frames to fit the window size
             frame_1_resized = cv2.resize(frame_1[0], (screen_width, screen_height))
             frame_2_resized = cv2.resize(frame_2[0], (screen_width, screen_height))
             cv2.imshow('Camera 1', frame_1_resized)
             cv2.imshow('Camera 2', frame_2_resized)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            run_flag[0] = False  # Signal threads to stop
             break
 
     cap_1.release()
