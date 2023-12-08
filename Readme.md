@@ -21,21 +21,23 @@ Before running the script, ensure that you have Python 3.x installed on your sys
 
 ```bash
 pip install onvif-zeep python-opencv
+```
 
 ## Configuration 
 Before running the script, configure the IP addresses, ports, usernames, and passwords for your ONVIF cameras in the main function:
 
+```bash
 ip_1, ip_2 = '<Camera1_IP>', '<Camera2_IP>'
 port, user, password = <Camera_Port>, '<Username>', '<Password>'
 brightness_threshold = <Brightness_Threshold>
-
+```
 
 ## Usage
 Run the script using Python: 
 
 ```bash
 python3 camera_stream_manager.py
-
+```
 The script will start capturing video feeds from both cameras. The feed from Camera 1 will be displayed until the brightness exceeds the threshold, after which it will switch to Camera 2.
 
 ##Quitting the Application
